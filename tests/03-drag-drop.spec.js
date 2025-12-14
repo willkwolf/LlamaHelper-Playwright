@@ -1,0 +1,17 @@
+const { test, expect } = require('@playwright/test');
+
+test('Drag and Drop', async ({ page }) => {
+    await page.goto('/droppable');
+
+    const draggable = page.locator('#draggable');
+    const droppable = page.getByRole('tabpanel', { name: 'Simple' }).locator('#droppable').first();
+
+    await expect(droppable).toContainText('Drop here');
+
+    await draggable.dragTo(droppable);
+
+    await expect(droppable).toContainText('Dropped!');
+    await expect(droppable).toHaveCSS('background-color', 'rgb(70, 130, 180)'); // SteelBlue
+
+    await page.screenshot({ path: 'screenshots/drag-drop-result.png' });
+});

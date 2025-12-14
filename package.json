@@ -1,0 +1,24 @@
+{
+  "name": "reto-testing-demoqa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "playwright test --reporter=json,html",
+    "report": "playwright show-report",
+    "auto-repair": "node auto-repair.js",
+    "auto-fix": "node auto-fix.js",
+    "mcp:run": "npm run auto-repair && npm run auto-fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "node-fetch": "^3.3.2",
+    "playwright": "^1.57.0"
+  }
+}

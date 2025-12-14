@@ -1,0 +1,7 @@
+{
+  "name": "playwright-auto-repair",
+  "reportPattern": "reportes/auto-repair-*.md",
+  "applyCommand": "node auto-fix.js",
+  "description": "Use the latest auto-repair Markdown report and run auto-fix.js to apply safe fixes (timeout increase, selector refinement).",
+  "notes": "auto-fix creates backups (.bak) before editing files. Review changes before committing."
+}

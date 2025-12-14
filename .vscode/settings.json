@@ -1,0 +1,17 @@
+{
+    "github.copilot.editor.enableAutoCompletions": true,
+    "github.copilot.chat.runCommand": true,
+
+    // Enable MCP integration (workspace flag; server definitions below are a safe, non-invasive convention)
+    "mcp.enabled": true,
+    "mcp.servers": {
+        "playwright": {
+            "command": "node ${workspaceFolder}/helpers/mcp-playwright-server.js",
+            "port": 11435,
+            "description": "Local MCP server stub for Playwright auto-repair integration"
+        }
+    },
+
+    // Enable Copilot Agent mode at workspace level (may require corresponding Copilot/Agent extension support)
+    "github.copilot.agent.enable": true
+}
