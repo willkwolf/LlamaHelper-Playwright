@@ -9,7 +9,8 @@ This project implements end-to-end (E2E) test automation for the [DemoQA](https:
 - `helpers/ai-helper.js`: Helper for AI interactions with Ollama
 - `auto-repair.js`: Script for automatic failure analysis and repair suggestions
 - `playwright.config.js`: Playwright configuration file
-- `run-tests.sh`: Bash script to orchestrate test execution and AI analysis
+- `run-tests.sh`: Bash script to orchestrate test execution, AI analysis, auto-repair, and report opening
+- `run-tests.ps1`: PowerShell script to orchestrate test execution, AI analysis, auto-repair, and report opening
 - `screenshots/`: Directory for test screenshots
 - `reportes/`: Directory for auto-repair reports
 - `playwright-report/`: HTML reports from Playwright
@@ -46,3 +47,4 @@ William Camilo Artunduaga Viana
 3. Configure Ollama and Llama 3.2 model.
 4. Run tests: `npx playwright test`
 5. For AI analysis: `node auto-repair.js`
+6. For full automated flow with AI analysis, auto-repair, and report opening: `./run-tests.ps1` (Windows PowerShell) or `./run-tests.sh` (Linux/Mac Bash)
