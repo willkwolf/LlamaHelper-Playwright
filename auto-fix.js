@@ -4,7 +4,8 @@ const path = require('path');
 function findLatestReport() {
   const dir = path.join(__dirname, 'reportes');
   if (!fs.existsSync(dir)) return null;
-  const files = fs.readdirSync(dir).filter(f => f.startsWith('auto-repair-') && f.endsWith('.md'));
+  // prefer timestamped auto-repair reports like auto-repair-<digits>.md
+  const files = fs.readdirSync(dir).filter(f => /^auto-repair-\d+\.md$/.test(f));
   if (files.length === 0) return null;
   files.sort();
   return path.join(dir, files[files.length - 1]);
@@ -84,6 +85,27 @@ function parseReportAndApply(reportPath) {
     changes.push({ type: 'timeout', applied: ok });
   }
 
+  // If report mentions modal visibility waits in spec files, adjust per-spec waits
+  function adjustModalTimeoutInSpec(specFilePath) {
+    if (!fs.existsSync(specFilePath)) return false;
+    backupFile(specFilePath);
+    let content = fs.readFileSync(specFilePath, 'utf8');
+    // Replace long modal waits of 120000 -> 30000, or remove explicit timeout
+    let replaced = false;
+    const re1 = /toBeVisible\(\{\s*timeout\s*:\s*120000\s*\}\)/g;
+    if (re1.test(content)) {
+      content = content.replace(re1, 'toBeVisible({ timeout: 30000 })');
+      replaced = true;
+    }
+    const re2 = /toBeVisible\(\{\s*timeout\s*:\s*\d+\s*\}\)/g;
+    if (re2.test(content)) {
+      content = content.replace(re2, 'toBeVisible({ timeout: 30000 })');
+      replaced = true;
+    }
+    if (replaced) fs.writeFileSync(specFilePath, content, 'utf8');
+    return replaced;
+  }
+
   // For selector issues (e.g., #droppable), attempt to refine selectors in referenced spec files
   // Parse sections: look for **File:** `filename`
   const fileSections = [...md.matchAll(/\*\*File:\*\* `([^`]+)`[\s\S]*?(?:\n---|$)/g)];
@@ -106,6 +128,24 @@ function parseReportAndApply(reportPath) {
       }
       changes.push({ type: 'selector:droppable', file, strategy: 'appendFirst', applied });
     }
+
+  // As a final pass, if the report contained the practice-form timeout issue, apply spec-level fix
+  const practiceFileMatch = md.match(/\*\*File:\*\* `([^`]+)`[\s\S]*?timeout/i);
+  if (practiceFileMatch) {
+    const target = practiceFileMatch[1];
+    const candidates = [
+      path.join(__dirname, target),
+      path.join(__dirname, 'tests', target),
+      target
+    ];
+    for (const p of candidates) {
+      if (p && fs.existsSync(p)) {
+        const applied = adjustModalTimeoutInSpec(p);
+        changes.push({ type: 'spec:modal-timeout', file: p, applied });
+        break;
+      }
+    }
+  }
 
     // Strategy B: replace label[for="hobbies-checkbox-1"] with input id selector
     if (/hobbies-checkbox-1/i.test(sectionText)) {

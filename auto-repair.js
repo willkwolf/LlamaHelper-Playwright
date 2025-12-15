@@ -42,14 +42,16 @@ async function runAutoRepair() {
     // New detection logic: consider a spec failed when spec.ok is false or when any test result has non-passed status
     (results.suites || []).forEach(suite => {
         (suite.specs || []).forEach(spec => {
-            // If suite/spec marked not ok, collect errored test results inside
+            // Treat flaky specs as candidates for repair as well
+            const specStatus = (spec.status || '').toString().toLowerCase();
+            const specIsFlaky = specStatus === 'flaky' || spec.ok === false;
+
             (spec.tests || []).forEach(test => {
                 // Look into test.results array for any non-passed entry
                 const badResults = (test.results || []).filter(r => r.status && r.status !== 'passed');
-                if (badResults.length > 0 || spec.ok === false) {
-                    // For each bad result push a failure entry (or at least one)
+
+                if (badResults.length > 0) {
                     badResults.forEach(r => {
-                        // Determine error message
                         let errorMsg = 'Unknown error';
                         if (r.error && r.error.message) errorMsg = r.error.message;
                         else if (Array.isArray(r.errors) && r.errors[0] && r.errors[0].message) errorMsg = r.errors[0].message;
@@ -58,9 +60,20 @@ async function runAutoRepair() {
                             title: spec.title,
                             file: suite.file,
                             error: errorMsg,
-                            rawResult: r
+                            rawResult: r,
+                            flaky: false
                         });
                     });
+                } else if (specIsFlaky) {
+                    // No explicit failing result in this run, but the spec is marked flaky -> create a flaky entry
+                    const synthesized = {
+                        title: spec.title,
+                        file: suite.file,
+                        error: 'Spec marked as flaky (intermittent failures detected in previous runs)',
+                        rawResult: (test.results && test.results[0]) || {},
+                        flaky: true
+                    };
+                    failures.push(synthesized);
                 }
             });
         });

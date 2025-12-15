@@ -11,7 +11,7 @@
     "report": "playwright show-report",
     "auto-repair": "node auto-repair.js",
     "auto-fix": "node auto-fix.js",
-    "mcp:run": "npm run auto-repair && npm run auto-fix"
+    "mcp:run": "node scripts/mcp-run.js"
   },
   "keywords": [],
   "author": "",
